@@ -1,0 +1,15 @@
+# /usr/lib/systemd/system/amd-gpu-power_profile.service
+#
+# Copyright (c) 2017 Malcolm J Lewis <malcolmlewis@opensuse.org>
+#
+
+[Unit]
+Description=GPU Power Profile service for radeon and amdgpu kernel modules
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/sysconfig/amd_gpu_power_profile
+ExecStart=/bin/sh -c "/usr/sbin/amd_gpu_power_profile ${OPERATION_MODE} ${PERFORMANCE_LEVEL}"
+
+[Install]
+WantedBy=multi-user.target

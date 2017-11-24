@@ -1,0 +1,97 @@
+#!/bin/bash
+
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2.0 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# General Public License for more details.
+#
+# Copyright (C) 2017 Malcolm Lewis <malcolmlewis@opensuse.org>
+
+EXEC_NAME=`basename $0`;
+
+MY_DEBUG=0
+
+TARGET_CARD=0
+
+OP_TARGET="/sys/class/drm/card$TARGET_CARD/device/power_dpm_state"
+CURRENT_OPERATION=`cat ${OP_TARGET}`
+
+PERF_TARGET="/sys/class/drm/card$TARGET_CARD/device/power_dpm_force_performance_level"
+CURRENT_PERF=`cat ${PERF_TARGET}`
+
+if [ $MY_DEBUG == 1 ]; then
+
+   ## Operation Mode ##
+   #battery lowest power consumption
+   #balanced sane default
+   #performance highest performance
+   echo "Current Operation Mode is $CURRENT_OPERATION"
+
+   ## Performance Level ##
+   #auto default; uses all levels in the power state
+   #low enforces the lowest performance level
+   #high enforces the highest performance level
+   echo "Current Performance Level is $CURRENT_PERF"
+fi
+
+append_mode() {
+   local MODE_PROFILE=$1
+   echo -n "  ${MODE_PROFILE}"
+   if [ "x${CURRENT_OPERATION}x" == "x${MODE_PROFILE}x" ]; then
+      echo -n " (current)"
+   fi
+   echo
+}
+
+append_perf() {
+   local PERF_PROFILE=$1
+   echo -n "  ${PERF_PROFILE}"
+   if [ "x${CURRENT_PERF}x" == "x${PERF_PROFILE}x" ]; then
+      echo -n " (current)"
+   fi
+   echo
+}
+
+if (( $# != 2 )); then
+   echo
+   echo "Usage: $0 <OPERATION_MODE> <PERFORMANCE_LEVEL>" >&2
+   echo
+   echo "Valid modes:"
+   for AVAILABLE_MODE in battery balanced performance; do
+      append_mode ${AVAILABLE_MODE}
+   done
+   echo "Valid performance levels:"
+   for AVAILABLE_PERF in auto low high; do
+      append_perf ${AVAILABLE_PERF}
+   done
+   exit 1
+fi
+
+MODE_PROFILE="$1"
+PERF_PROFILE="$2"
+
+if [ $MY_DEBUG == 1 ]; then
+   echo "Selected Mode is $MODE_PROFILE"
+   echo "Selected Performance Level is $PERF_PROFILE"
+fi
+
+if [ "x${MODE_PROFILE}x" == "xbatteryx" ] || [ "x${MODE_PROFILE}x" == "xbalancedx" ] || [ "x${MODE_PROFILE}x" == "xperformancex" ]; then
+   echo "${MODE_PROFILE}" > ${OP_TARGET}
+else
+   echo "[${EXEC_NAME}] WARNING: Invalid operation mode used '${MODE_PROFILE}'"
+   exit 1
+fi
+
+if [ "x${PERF_PROFILE}x" == "xautox" ] || [ "x${PERF_PROFILE}x" == "xlowx" ] || [ "x${PERF_PROFILE}x" == "xhighx" ]; then
+   echo "${PERF_PROFILE}" > ${PERF_TARGET}
+else
+   echo "[${EXEC_NAME}] WARNING: Invalid performance level used '${PERF_PROFILE}'"
+   exit 1
+fi
+
+exit 0

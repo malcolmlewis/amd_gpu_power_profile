@@ -1,0 +1,22 @@
+## Description: amd-gpu-power-profile.service configuration file
+## URL: 
+## License: GPL-2.0
+## Copyright (c) 2017 Malcolm J Lewis <malcolmlewis@opensuse.org>
+## Path: System/amd_gpu_power_profile
+## Description:	Operation Mode parameters
+## Type:	list(battery,balanced,performance)
+## Default:	"battery"
+## ServiceRestart: amd_gpu_power_profile.service
+#
+# Operation Mode parameters for amd_gpu_power_profile, default battery
+#
+OPERATION_MODE="battery"
+
+## Description:	Performanace Level parameters
+## Type:	list(auto,low,high)
+## Default:	"low"
+## ServiceRestart: amd_gpu_power_profile.service
+#
+# Performanace Level parameters for amd_gpu_power_profile, default low
+#
+PERFORMANCE_LEVEL="low"
